@@ -47,7 +47,7 @@
         - httpd
         - xinetd
     - name: Create and start prod monitoring site
-      command: 'omd create prod && omd start prod'
+      command: 'omd create prod --admin-password changeme && omd start prod'
       # username/password is omdadmin/omd
       # you should now be able to log into the WebUI
       # Additionally, you may want to run 'omd config prod'
