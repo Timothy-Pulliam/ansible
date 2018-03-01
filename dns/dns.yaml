@@ -52,6 +52,7 @@
         state: enabled
         service: dns
         permanent: true
+        immediate: true
 # At this point, the only thing left to do is to add zones and
 # resource records (A, AAAA, PTR, SRV, etc.)
     - name: Create forward zone template file for the domain

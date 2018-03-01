@@ -1,0 +1,54 @@
+---
+- hosts: all
+  tasks:
+    - name: Install and enable EPEL repository
+      yum:
+        state: latest
+        name: epel-release
+    - name: Download check_mk RPM
+      get_url:
+        url: 'https://mathias-kettner.de/support/1.4.0p10/check-mk-raw-1.4.0p10-el7-57.x86_64.rpm'
+        dest: /tmp/check_mk.rpm
+        owner: root
+        group: root
+        mode: 0700
+        timeout: 300
+    - name: Install check_mk RPM
+      yum:
+        state: latest
+        name: "{{ item }}"
+      with_items:
+        - /tmp/check_mk.rpm
+        - check-mk-agent
+        - xinetd
+    - name: Set http selinux boolean
+      # The commented out code requires libselinux-python,
+      # and libsemanage-python to be installed on all target hosts.
+      # This is undesirable.
+      # seboolean:
+      #   name: httpd_can_network_connect
+      #   state: yes
+      #   persistent: yes
+      command: 'setsebool -P httpd_can_network_connect 1'
+    - name: Firewall settings
+      firewalld:
+        state: enabled
+        service: http
+        permanent: true
+        immediate: true
+    - name: Enable httpd, xinetd services
+      systemd:
+        state: started
+        enabled: yes
+        daemon_reload: yes
+        name: "{{ item }}"
+      with_items:
+        - omd
+        - httpd
+        - xinetd
+    - name: Create and start prod monitoring site
+      command: 'omd create prod && omd start prod'
+      # username/password is omdadmin/omd
+      # you should now be able to log into the WebUI
+      # Additionally, you may want to run 'omd config prod'
+      # To do additional configuration.
