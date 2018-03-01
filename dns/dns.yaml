@@ -1,0 +1,76 @@
+# This Ansible playbook is for building an authoritative DNS
+# server. Recursion is disabled. Also, named listens on all IP
+# interfaces. This is not a secure server.
+
+# Usage: The only thing you should have to do is fill in the variables below.
+# The playbook will configure the /etc/named.conf file. It will also add zones
+# based on the zone information provided in the variable section below.
+
+---
+- hosts:
+    -
+  vars:
+    # nameserver: ns1.example.com
+    # zone: example.com
+    # nameserver_ip: 192.168.1.190
+    # reverse_zone: 1.168.192
+    nameserver:
+    nameserver_ip:
+    zone:
+    reverse_zone:
+  tasks:
+    - name: Install bind bind-utils
+      yum:
+        state: latest
+        name: "{{ item }}"
+      with_items:
+        - bind
+        - bind-utils
+    - name: Backup /etc/named.conf to /etc/named.conf.orig
+      copy:
+        remote_src: yes
+        src: /etc/named.conf
+        dest: /etc/named.conf.orig
+    - name: Copy template named.conf to remote host
+      template:
+        src: named.conf
+        dest: /etc/named.conf
+        owner: named
+        group: named
+        mode: 0640
+        setype: named_conf_t
+    - name: Check that named.conf has correct syntax
+      command: named-checkconf
+    - name: Enable named service
+      systemd:
+        state: started
+        enabled: yes
+        daemon_reload: yes
+        name: named
+    - name: Open firewall for DNS
+      firewalld:
+        state: enabled
+        service: dns
+        permanent: true
+# At this point, the only thing left to do is to add zones and
+# resource records (A, AAAA, PTR, SRV, etc.)
+    - name: Create forward zone template file for the domain
+      template:
+        src: zone_template.j2
+        dest: /var/named/{{ zone }}.db
+        owner: named
+        group: named
+        mode: 0640
+        setype: named_zone_t
+    - name: Check that the forward zone file has proper syntax
+      command: named-checkzone {{ zone }} /var/named/{{ zone }}.db
+    - name: Create reverse zone template for the domain
+      template:
+        src: reverse_zone.j2
+        dest: /var/named/{{ reverse_zone }}.IN-ADDR.ARPA.db
+        owner: named
+        group: named
+        mode: 0640
+        setype: named_zone_t
+    - name: Check that the reverse zone file has correct syntax
+      command: named-checkzone {{ reverse_zone }}.IN-ADDR.ARPA /var/named/{{ reverse_zone }}.IN-ADDR.ARPA.db

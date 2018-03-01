@@ -1,0 +1,9 @@
+---
+- hosts: all
+  tasks:
+    - name: Install and enable EPEL repository
+      yum:
+        state: latest
+        name: epel-release
+    - name: Install check_mk
+      url
