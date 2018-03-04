@@ -1,0 +1,10 @@
+# Run this playbook on all hosts that should query the DNS server.
+- hosts: all
+  vars:
+    # dns_server: 192.168.1.190
+    dns_server: 192.168.1.190
+  tasks:
+    - name: Add DNS server's IPv4 address to client's /etc/resolv.conf
+      command: "nmcli con mod {{ ansible_default_ipv4['interface'] }} ipv4.dns {{ dns_server }}"
+    - name: Restart default network interface to update /etc/resolv.conf
+      shell: "ifdown {{ ansible_default_ipv4['interface'] }} && ifup {{ ansible_default_ipv4['interface'] }}"
