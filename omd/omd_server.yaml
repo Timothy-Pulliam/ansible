@@ -21,6 +21,8 @@
         - /tmp/check_mk.rpm
         - check-mk-agent
         - xinetd
+        # nc can be used to troubleshoot connections to check_mk_agents
+        - nc
     - name: Set http selinux boolean
       # The commented out code requires libselinux-python,
       # and libsemanage-python to be installed on all target hosts.
