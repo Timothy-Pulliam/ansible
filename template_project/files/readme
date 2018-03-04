@@ -1,0 +1,3 @@
+Files that get copied from the host running ansible to the target host are stored
+here. That includes things like *.txt files, executables or other files that
+could be copied over using the ansible copy module.
