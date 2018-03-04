@@ -10,10 +10,13 @@
       yum:
         state: latest
         name: epel-release
-    - name: Install check-mk-agent
+    - name: Install check-mk-agent, xinetd
       yum:
         state: latest
-        name: check-mk-agent
+        name: "{{ item }}"
+      with_items:
+        - check-mk-agent
+        - xinetd
     - name: Enable xinetd service
       systemd:
         state: started
