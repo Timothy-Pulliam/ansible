@@ -1,0 +1,34 @@
+---
+- hosts:
+    - omd_clients
+  vars:
+    # omd_server is the name of the server check_mk reports to. The value of This
+    # varaible will be added to /etc/xinetd.d/check_mk_agent.conf
+    - omd_server: 192.168.1.191
+  tasks:
+    - name: Install EPEL repository
+      yum:
+        state: latest
+        name: epel-release
+    - name: Install check-mk-agent
+      yum:
+        state: latest
+        name: check-mk-agent
+    - name: Enable xinetd service
+      systemd:
+        state: started
+        name: xinetd
+    - name: Open firewall port 6556/tcp for check_mk_agent
+      firewalld:
+        state: enabled
+        port: 6556/tcp
+        immediate: yes
+        permanent: yes
+    - name: Template out /etc/xinetd.d/check-mk-agent file
+      template:
+        src: check-mk-agent
+        dest: /etc/xinetd.d/check-mk-agent
+        owner: root
+        group: root
+        mode: 0644
+        setype: etc_t
