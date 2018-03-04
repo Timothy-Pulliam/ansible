@@ -8,16 +8,16 @@
 
 ---
 - hosts:
-    -
+    - all
   vars:
     # nameserver: ns1.example.com
     # zone: example.com
     # nameserver_ip: 192.168.1.190
     # reverse_zone: 1.168.192
-    nameserver:
-    nameserver_ip:
-    zone:
-    reverse_zone:
+    nameserver: freeipa.home
+    nameserver_ip: 192.168.1.190
+    zone: home
+    reverse_zone: 1.168.192
   tasks:
     - name: Install bind bind-utils
       yum:
@@ -41,20 +41,6 @@
         setype: named_conf_t
     - name: Check that named.conf has correct syntax
       command: named-checkconf
-    - name: Enable named service
-      systemd:
-        state: started
-        enabled: yes
-        daemon_reload: yes
-        name: named
-    - name: Open firewall for DNS
-      firewalld:
-        state: enabled
-        service: dns
-        permanent: true
-        immediate: true
-# At this point, the only thing left to do is to add zones and
-# resource records (A, AAAA, PTR, SRV, etc.)
     - name: Create forward zone template file for the domain
       template:
         src: zone_template.j2
@@ -75,3 +61,17 @@
         setype: named_zone_t
     - name: Check that the reverse zone file has correct syntax
       command: named-checkzone {{ reverse_zone }}.IN-ADDR.ARPA /var/named/{{ reverse_zone }}.IN-ADDR.ARPA.db
+    - name: Enable named service
+      systemd:
+        state: started
+        enabled: yes
+        daemon_reload: yes
+        name: named
+    - name: Open firewall for DNS
+      firewalld:
+        state: enabled
+        service: dns
+        permanent: true
+        immediate: true
+        # At this point, the only thing left to do is to add
+        # resource records (A, AAAA, PTR, SRV, etc.) to /var/named zones
