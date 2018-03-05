@@ -1,0 +1,7 @@
+# The NTP server the system should get time from. If you set the value to
+# ntp_server: 127.127.1.0
+# The server will become an NTP server and use its local clock for time.
+#
+# If this variable is set, the default centos.ntp.org ntp servers will
+# be commented out in /etc/ntp.conf to ensure this server is used.
+ntp_server: 127.127.1.0

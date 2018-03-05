@@ -1,0 +1,38 @@
+# chronyd cannot be an ntp server
+- name: Disable chronyd in favor of ntpd
+  systemd:
+    name: chronyd
+    enabled: no
+    masked: yes
+    state: stopped
+- name: Install ntp, and ntpdate
+  yum:
+    state: latest
+    name: "{{ item }}"
+  with_items:
+    - ntp
+    - ntpdate
+- name: Template out /etc/ntp.conf
+  template:
+    src: ntp.conf
+    dest: /etc/ntp.conf
+    owner: root
+    group: root
+    mode: 644
+    setype: net_conf_t
+- name: Enable ntpd service
+  systemd:
+    name: ntpd
+    enabled: yes
+    state: started
+- name: Restart ntpd service
+  systemd:
+    name: ntpd
+    enabled: yes
+    state: restarted
+- name: Open firewall port 123/udp
+  firewalld:
+    service: ntp
+    permanent: yes
+    immediate: yes
+    state: enabled
