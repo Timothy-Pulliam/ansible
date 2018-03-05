@@ -4,4 +4,8 @@
 #
 # If this variable is set, the default centos.ntp.org ntp servers will
 # be commented out in /etc/ntp.conf to ensure this server is used.
-ntp_server:
+ntp_server: 192.168.1.190
+# If this system is an ntp server and will be handling other
+# ntp requests we need to open port 123/udp. Otherwise, if it is
+# simply a client, do not open the firewall.
+open_firewall: no

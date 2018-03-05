@@ -36,3 +36,4 @@
     permanent: yes
     immediate: yes
     state: enabled
+  when: open_firewall == 'yes'
