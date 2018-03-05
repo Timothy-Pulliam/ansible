@@ -12,3 +12,12 @@
     group: root
     mode: 0644
     setype: etc_t
+- name: Template out /etc/yum/yum-cron-hourly.conf
+  template:
+    backup: yes
+    src: yum-cron-hourly.conf
+    dest: /etc/yum/yum-cron-hourly.conf
+    owner: root
+    group: root
+    mode: 0644
+    setype: etc_t
