@@ -1,0 +1,2 @@
+# The email address that yum-cron will alert when updates are applied
+admin_email: killmypotato@gmail.com
