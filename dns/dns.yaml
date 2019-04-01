@@ -9,16 +9,23 @@
 ---
 - hosts:
     - all
-  vars:
-    # nameserver: ns1.example.com
-    # zone: example.com
-    # nameserver_ip: 192.168.1.190
-    # reverse_zone: 1.168.192
-    nameserver: freeipa.home
-    nameserver_ip: 192.168.1.190
-    zone: home
-    reverse_zone: 1.168.192
+#  vars:
+#    # nameserver: ns1.example.com
+#    # zone: example.com
+#    # nameserver_ip: 192.168.1.190
+#    # reverse_zone: 1.168.192
+#    nameserver: ns1.home
+#    nameserver_ip: 192.168.1.214
+#    zone: home
+#    reverse_zone: 1.168.192
+#    # Uncomment out the below non-autoritative DNS servers
+#    # to add them to /etc/resolv.conf
+#    # DNS2: 192.168.1.1
+#    # DNS3:
   tasks:
+    - name: Load variables
+      include_vars:
+        file: ./vars/main.yml
     - name: Install bind bind-utils
       yum:
         state: latest
@@ -73,5 +80,16 @@
         service: dns
         permanent: true
         immediate: true
-        # At this point, the only thing left to do is to add
-        # resource records (A, AAAA, PTR, SRV, etc.) to /var/named zones
+    - name: Add DNS server's IPv4 address to /etc/resolv.conf
+      command: "nmcli con mod {{ ansible_default_ipv4['interface'] }} ipv4.dns {{ nameserver_ip }}"
+    - name: Add non-authoritative DNS servers to /etc/resolv.conf
+      shell: "nmcli con mod {{ ansible_default_ipv4['interface'] }} +ipv4.dns {{ item }}"
+      when: item != ""
+      with_items:
+        - "{{ DNS2 | default([]) }}"
+        - "{{ DNS3 | default([]) }}"
+    - name: Restart default network interface to update /etc/resolv.conf
+      shell: "nmcli con reload && nmcli con up {{ ansible_default_ipv4['interface'] }}"
+       # At this point, the only thing left to do is to add
+       # resource records (A, AAAA, PTR, SRV, etc.) to /var/named zones
+

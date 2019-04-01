@@ -1,0 +1,7 @@
+---
+nameserver: ns1.home
+nameserver_ip: 192.168.1.214
+zone: home
+reverse_zone: 1.168.192
+DNS2: 192.168.1.1
+DNS3:
