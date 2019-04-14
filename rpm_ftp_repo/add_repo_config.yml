@@ -1,0 +1,20 @@
+---
+- hosts: all
+  vars:
+    ftp_server: ftp.home
+  tasks:
+  - name: create /etc/yum.repos.d/centos-base-local.repo
+    template:
+      src: centos-base-local.repo
+      dest: /etc/yum.repos.d/centos-base-local.repo
+      owner: root
+      group: root
+      mode: 0644
+      setype: system_conf_t
+  - name: disable CentOS-Base.repo
+    lineinfile:
+      state: present
+      path: /etc/yum.repos.d/CentOS-Base.repo
+      regexp: "enabled=1"
+      line: enabled=0
+      insertafter: '^\[base\]$'
