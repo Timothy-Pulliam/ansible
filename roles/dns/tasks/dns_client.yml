@@ -1,0 +1,14 @@
+# Run this playbook on all hosts that should query the DNS server.
+- name: Load variables
+  include_vars:
+    file: ./vars/main.yml
+- name: Add DNS server's IPv4 address to /etc/resolv.conf
+  command: "nmcli con mod {{ ansible_default_ipv4['interface'] }} ipv4.dns {{ nameserver_ip }}"
+- name: Add non-authoritative DNS servers to /etc/resolv.conf
+  shell: "nmcli con mod {{ ansible_default_ipv4['interface'] }} +ipv4.dns {{ item }}"
+  when: item != ""
+  with_items:
+    - "{{ DNS2 | default([]) }}"
+    - "{{ DNS3 | default([]) }}"
+- name: Restart default network interface to update /etc/resolv.conf
+  shell: "nmcli con reload && nmcli con up {{ ansible_default_ipv4['interface'] }}"
