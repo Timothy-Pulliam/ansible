@@ -1,0 +1,12 @@
+- name: Install neccessary packages for freeipa
+  yum:
+    name: ['freeipa-server', 'ipa-server-dns', 'samba']
+    state: latest
+- name: Install IPA server
+  command: ipa-server-install --realm={{ realm }} --domain={{ domain }} --ds-password=changeme --admin-password=changeme --hostname={{ ipa_hostname }} --ip-address={{ ipa_ipv4 }} --mkhomedir --forwarder={{ DNS1 }} --forwarder={{ DNS2 }}
+- name: Open firewall
+  firewalld:
+    service: ['http', 'https', 'ldap', 'ldaps', 'kerberos', 'dns', 'ntp']
+    state: enabled
+    permanent: yes
+- name: 
