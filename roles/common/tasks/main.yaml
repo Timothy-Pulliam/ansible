@@ -1,0 +1,47 @@
+# Run on all hosts that should query the DNS server.
+- name: Ensure static IP is set
+  lineinfile:
+    path: /etc/sysconfig/network-scripts/ifcfg-eth0
+    state: present
+    regexp: '^BOOTPROTO='
+    line: 'BOOTPROTO=none'
+- name: Add DNS servers to ifcfg-* file
+  lineinfile:
+    path: /etc/sysconfig/network-scripts/ifcfg-eth0
+    state: present
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: '^DNS1=', line: 'DNS1=192.168.86.3' }
+    - { regexp: '^DNS2=', line: 'DNS2=192.168.86.1' }
+- name: Restart default network interface to update /etc/resolv.conf
+  shell: "nmcli con reload && nmcli con up {{ ansible_default_ipv4['interface'] }}"
+# FTP RPM settings
+- name: create /etc/yum.repos.d/centos-base-local.repo
+  template:
+    src: centos-base-local.repo
+    dest: /etc/yum.repos.d/centos-base-local.repo
+    owner: root
+    group: root
+    mode: 0644
+    setype: system_conf_t
+- name: disable CentOS-Base.repo
+  lineinfile:
+    state: present
+    path: /etc/yum.repos.d/CentOS-Base.repo
+    regexp: "^enabled="
+    line: "enabled=0"
+    insertafter: '^\[base\]$'
+# Update after we have set up the local repository
+- name: Import Centos 7 Base gpg key
+  rpm_key:
+    state: present
+    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 
+- name: Update system
+  yum:
+    name: '*'
+    state: latest
+- name: Install universal packages
+  yum:
+    state: latest
+    name: ['vim', 'bash-completion', 'sysstat',]
