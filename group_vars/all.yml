@@ -1,0 +1,6 @@
+# DNS settings
+nameserver_ip: 192.168.86.3
+DNS2: 192.168.86.1
+DNS3:
+# FTP RPM Repo settings
+ftp_server: ftp.home
