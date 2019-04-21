@@ -1,0 +1,10 @@
+[all]
+ns1.home
+ftp.home
+freeipa.home
+
+[dns]
+ns1.home
+
+[freeipa]
+freeipa.home
