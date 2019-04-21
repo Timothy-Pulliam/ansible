@@ -1,0 +1,6 @@
+[centos-base-local]
+name=centos-base-local
+enabled=1
+gpgcheck=1
+baseurl=ftp://{{ ftp_server }}/pub/centos-base-local
+

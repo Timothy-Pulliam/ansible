@@ -1,0 +1,30 @@
+- name: Check for available disk space for reposync
+  script: ./ftp_disk_check.sh
+  register: ftp_disk_check
+- fail:
+    msg: "Not enough disk space in /var for rpm packages"
+  when: ftp_disk_check.rc != 0
+- name: install packages for ftp / rpm repo sync
+  yum:
+    state: latest
+    name: "{{ item }}"
+  with_items:
+    - vsftpd
+    - yum-utils
+    - createrepo
+- name: start and enable ftp service
+  systemd:
+    name: vsftpd
+    state: started
+    enabled: yes
+- name: Open firewall for FTP
+  firewalld:
+    state: enabled
+    service: ftp
+    permanent: true
+    immediate: true
+- name: create local copy of centos 7 base repo
+  shell: reposync --gpgcheck --plugins --repoid=base && mv {base,centos-base-local} && createrepo -v centos-base-local
+  args:
+    chdir: /var/ftp/pub
+  
